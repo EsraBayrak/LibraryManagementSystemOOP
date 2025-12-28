@@ -11,13 +11,24 @@ public class Book implements Searchable {
 
   
     public Book(String id, String title, String author, String isbn, int totalCopies) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Book id is required");
+        }
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Title is required");
+        }
+        if (totalCopies <= 0) {
+            throw new IllegalArgumentException("Total copies must be positive");
+        }
+
         this.id = id;
         this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.totalCopies = totalCopies;
-        this.availableCopies = totalCopies; 
+        this.availableCopies = totalCopies;
     }
+
 
     
     public String getId() {
