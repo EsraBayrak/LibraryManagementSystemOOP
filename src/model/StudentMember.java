@@ -17,25 +17,26 @@ public class StudentMember extends Member {
         this.department = department;
     }
 
+    // POLYMORPHISM: Student için indirimli ceza
     @Override
     public double calculateFee(int lateDays) {
-        // Member: 2.0 TL/gün
-        // Student: %50 indirim => 1.0 TL/gün
-        double discountedDailyFee = 1.0;
-        return lateDays * discountedDailyFee;
+        if (lateDays <= 0) return 0.0;
+        return lateDays * 1.0; 
     }
 
+    // INTERFACE + INHERITANCE 
     @Override
     public boolean matches(String query) {
-        if (query == null) return false;
+        if (query == null || query.isBlank()) return false;
 
-        String lower = query.toLowerCase();
+      
+        if (super.matches(query)) {
+            return true;
+        }
 
-        if (getName() != null && getName().toLowerCase().contains(lower)) return true;
-        if (getMemberId() != null && getMemberId().toLowerCase().contains(lower)) return true;
-        if (getEmail() != null && getEmail().toLowerCase().contains(lower)) return true;
-        if (department != null && department.toLowerCase().contains(lower)) return true;
-
-        return false;
+       
+        return department != null 
+            && department.toLowerCase().contains(query.toLowerCase());
     }
 }
+
