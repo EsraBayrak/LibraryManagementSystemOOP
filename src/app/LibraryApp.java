@@ -1,6 +1,7 @@
 package app;
 
 import model.Book;
+import model.Loan;
 import model.Member;
 import model.StudentMember;
 import service.LibraryManager;
@@ -34,11 +35,11 @@ public class LibraryApp {
                 case 8 -> searchBooksFlow(manager);
                 case 9 -> searchMembersFlow(manager);
                 case 10 -> {
-                    System.out.println("Bye.");
+                    System.out.println("Exiting the system.");
                     sc.close();
                     return;
                 }
-                default -> System.out.println("Invalid choice. Please enter 0-9.");
+                default -> System.out.println("Invalid choice. Please enter 1-10.");
             }
         }
     }
@@ -61,7 +62,7 @@ public class LibraryApp {
 
     private static void addBookFlow(LibraryManager manager) {
         System.out.println("\n--- ADD BOOK ---");
-        String id = readLine("Book ID (e.g., B3): ");
+        String id = readLine("Book ID: ");
         String title = readLine("Title: ");
         String author = readLine("Author: ");
         String isbn = readLine("ISBN: ");
@@ -82,6 +83,7 @@ public class LibraryApp {
             System.out.println("No books in library.");
             return;
         }
+
         for (Book b : manager.getBooks()) {
             System.out.println(b.getId() + " - " + b.getTitle()
                     + " | available: " + b.getAvailableCopies() + "/" + b.getTotalCopies());
@@ -94,7 +96,7 @@ public class LibraryApp {
         System.out.println("2) Student Member");
         int type = readInt("Type: ");
 
-        String memberId = readLine("Member ID (e.g., M1): ");
+        String memberId = readLine("Member ID: ");
         String name = readLine("Name: ");
         String email = readLine("Email: ");
 
@@ -117,6 +119,7 @@ public class LibraryApp {
             System.out.println("No members.");
             return;
         }
+
         for (Member m : manager.getMembers()) {
             System.out.println(m.getMemberId() + " - " + m.getName() + " | " + m.getEmail());
         }
@@ -124,23 +127,39 @@ public class LibraryApp {
 
     private static void borrowBookFlow(LibraryManager manager) {
         System.out.println("\n--- BORROW BOOK ---");
-        String loanId = readLine("Loan ID (e.g., L1): ");
+        String loanId = readLine("Loan ID: ");
         String bookId = readLine("Book ID: ");
         String memberId = readLine("Member ID: ");
 
-        int loanDays = readInt("How many days? (e.g., 7): ");
+        int loanDays = readInt("How many days?: ");
         LocalDate loanDate = LocalDate.now();
         LocalDate dueDate = loanDate.plusDays(loanDays);
 
         boolean ok = manager.borrowBook(loanId, bookId, memberId, loanDate, dueDate);
-        System.out.println(ok ? "Borrowed successfully." : "Borrow failed.");
+        if (ok) {
+            System.out.println("Borrowed successfully.");
+        } else {
+            System.out.println("Borrow failed.");
+        }
     }
 
     private static void returnBookFlow(LibraryManager manager) {
         System.out.println("\n--- RETURN BOOK ---");
         String loanId = readLine("Loan ID: ");
+
         boolean ok = manager.returnBook(loanId);
-        System.out.println(ok ? "Returned successfully." : "Return failed.");
+        if (!ok) {
+            System.out.println("Return failed.");
+            return;
+        }
+
+        Loan loan = manager.findLoanById(loanId);
+        if (loan != null) {
+            System.out.println("LateDays = " + loan.getLateDays());
+            System.out.println("Fee     = " + loan.calculateLateFee());
+        }
+
+        System.out.println("Returned successfully.");
     }
 
     private static void listLoansFlow(LibraryManager manager) {
@@ -149,37 +168,52 @@ public class LibraryApp {
             System.out.println("No loans.");
             return;
         }
-        manager.getLoans().forEach(loan -> {
-            String status = loan.isReturned() ? "RETURNED" : "ACTIVE";
+
+        for (Loan loan : manager.getLoans()) {
+            String status;
+            if (loan.isReturned()) {
+                status = "RETURNED";
+            } else {
+                status = "ACTIVE";
+            }
+
             System.out.println(loan.getLoanId()
                     + " | " + status
                     + " | Book=" + loan.getBook().getId()
                     + " | Member=" + loan.getMember().getMemberId()
                     + " | Due=" + loan.getDueDate()
                     + " | LateDays=" + loan.getLateDays());
-        });
+        }
     }
 
     private static void searchBooksFlow(LibraryManager manager) {
         System.out.println("\n--- SEARCH BOOKS ---");
         String q = readLine("Query: ");
         var results = manager.searchBooks(q);
+
         if (results.isEmpty()) {
             System.out.println("No books matched.");
             return;
         }
-        results.forEach(b -> System.out.println("- " + b.getId() + " | " + b.getTitle()));
+
+        for (Book b : results) {
+            System.out.println("- " + b.getId() + " | " + b.getTitle());
+        }
     }
 
     private static void searchMembersFlow(LibraryManager manager) {
         System.out.println("\n--- SEARCH MEMBERS ---");
         String q = readLine("Query: ");
         var results = manager.searchMembers(q);
+
         if (results.isEmpty()) {
             System.out.println("No members matched.");
             return;
         }
-        results.forEach(m -> System.out.println("- " + m.getMemberId() + " | " + m.getName()));
+
+        for (Member m : results) {
+            System.out.println("- " + m.getMemberId() + " | " + m.getName());
+        }
     }
 
     // ---------------- INPUT HELPERS ----------------
@@ -206,7 +240,8 @@ public class LibraryApp {
     private static void seedDemoData(LibraryManager manager) {
         manager.addBook(new Book("B1", "Clean Code", "Robert C. Martin", "1111", 2));
         manager.addBook(new Book("B2", "Effective Java", "Joshua Bloch", "2222", 1));
+
         manager.addMember(new Member("M1", "Ali", "ali@example.com"));
-        manager.addMember(new Member("M2", "Ayse", "ayse@example.com"));
+        manager.addMember(new StudentMember("S1", "Esra", "esra@example.com", "CENG"));
     }
 }
