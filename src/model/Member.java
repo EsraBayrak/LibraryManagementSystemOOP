@@ -22,7 +22,7 @@ public class Member implements Searchable {
         this.email = email;
     }
 
-    // Getters
+    
     public String getMemberId() {
         return memberId;
     }
@@ -35,7 +35,7 @@ public class Member implements Searchable {
         return email;
     }
 
-    // Setters (kontrollü)
+   
     public void setMemberId(String memberId) {
         if (memberId == null || memberId.isBlank()) {
             throw new IllegalArgumentException("memberId required");
@@ -57,7 +57,7 @@ public class Member implements Searchable {
         this.email = email;
     }
 
-    // Normal üye için gecikme ücreti: 2 TL / gün
+
     public double calculateFee(int lateDays) {
         if (lateDays <= 0) return 0.0;
         double dailyFee = 2.0;
