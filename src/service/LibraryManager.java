@@ -20,12 +20,12 @@ public class LibraryManager {
         this.loans = new ArrayList<>();
     }
 
-    // ---------------- GETTERS ----------------
+    
     public List<Book> getBooks() { return books; }
     public List<Member> getMembers() { return members; }
     public List<Loan> getLoans() { return loans; }
 
-    // ---------------- BOOK ----------------
+  
     public void addBook(Book book) {
         if (book == null) throw new IllegalArgumentException("book is null");
         books.add(book);
@@ -33,10 +33,29 @@ public class LibraryManager {
 
     public Book findBookById(String id) {
         if (id == null) return null;
+
         for (Book b : books) {
-            if (id.equals(b.getId())) return b;
+            if (id.equals(b.getId())) {
+                return b;
+            }
         }
         return null;
+    }
+
+    // Add/remove books (Minimum feature)
+    // Kitap ödünçteyse (available < total) silmeye izin vermez.
+    public boolean removeBook(String bookId) {
+        Book b = findBookById(bookId);
+        if (b == null) {
+            return false;
+        }
+
+        // Ödünçte kitap varsa silme (en az 1 kopya dışarıda)
+        if (b.getAvailableCopies() < b.getTotalCopies()) {
+            return false;
+        }
+
+        return books.remove(b);
     }
 
     // ---------------- MEMBER ----------------
@@ -47,14 +66,30 @@ public class LibraryManager {
 
     public Member findMemberById(String id) {
         if (id == null) return null;
+
         for (Member m : members) {
-            if (id.equals(m.getMemberId())) return m;
+            if (id.equals(m.getMemberId())) {
+                return m;
+            }
         }
         return null;
     }
 
-    // ---------------- BORROW / RETURN ----------------
-    public boolean borrowBook(String loanId, String bookId, String memberId, LocalDate loanDate, LocalDate dueDate) {
+    // ---------------- LOAN ----------------
+    public Loan findLoanById(String loanId) {
+        if (loanId == null) return null;
+
+        for (Loan l : loans) {
+            if (loanId.equals(l.getLoanId())) {
+                return l;
+            }
+        }
+        return null;
+    }
+
+    public boolean borrowBook(String loanId, String bookId, String memberId,
+                              LocalDate loanDate, LocalDate dueDate) {
+
         Book book = findBookById(bookId);
         if (book == null) {
             System.out.println("Book not found: " + bookId);
@@ -67,7 +102,6 @@ public class LibraryManager {
             return false;
         }
 
-        // Book stok kontrol
         if (!book.borrowCopy()) {
             System.out.println("No available copies for book: " + bookId);
             return false;
@@ -78,7 +112,7 @@ public class LibraryManager {
             loans.add(loan);
             return true;
         } catch (Exception e) {
-            // loan oluşamadıysa, stok düşürmeyi geri al
+            // loan oluşamadıysa stoğu geri al
             book.returnCopy();
             System.out.println("Loan create failed: " + e.getMessage());
             return false;
@@ -96,25 +130,24 @@ public class LibraryManager {
             return false;
         }
 
-        loan.returnBook(LocalDate.now());
-        return true;
-    }
-
-    public Loan findLoanById(String loanId) {
-        if (loanId == null) return null;
-        for (Loan l : loans) {
-            if (loanId.equals(l.getLoanId())) return l;
+        try {
+            loan.returnBook(LocalDate.now());
+            return true;
+        } catch (Exception e) {
+            System.out.println("Return failed: " + e.getMessage());
+            return false;
         }
-        return null;
     }
 
-    // ---------------- SEARCH ----------------
+    
     public List<Book> searchBooks(String query) {
         List<Book> out = new ArrayList<>();
         if (query == null || query.isBlank()) return out;
 
         for (Book b : books) {
-            if (b.matches(query)) out.add(b);
+            if (b.matches(query)) {
+                out.add(b);
+            }
         }
         return out;
     }
@@ -123,14 +156,12 @@ public class LibraryManager {
         List<Member> out = new ArrayList<>();
         if (query == null || query.isBlank()) return out;
 
-        String q = query.toLowerCase();
         for (Member m : members) {
-            if (m.getMemberId().toLowerCase().contains(q)
-                    || m.getName().toLowerCase().contains(q)
-                    || m.getEmail().toLowerCase().contains(q)) {
+            if (m.matches(query)) {
                 out.add(m);
             }
         }
         return out;
     }
 }
+

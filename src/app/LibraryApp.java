@@ -16,7 +16,7 @@ public class LibraryApp {
     public static void main(String[] args) {
         LibraryManager manager = new LibraryManager();
 
-        seedDemoData(manager); // istersen kapat
+        seedDemoData(manager); 
 
         System.out.println("=== Library Management System ===");
 
@@ -26,20 +26,21 @@ public class LibraryApp {
 
             switch (choice) {
                 case 1 -> addBookFlow(manager);
-                case 2 -> listBooksFlow(manager);
-                case 3 -> addMemberFlow(manager);
-                case 4 -> listMembersFlow(manager);
-                case 5 -> borrowBookFlow(manager);
-                case 6 -> returnBookFlow(manager);
-                case 7 -> listLoansFlow(manager);
-                case 8 -> searchBooksFlow(manager);
-                case 9 -> searchMembersFlow(manager);
-                case 10 -> {
+                case 2 -> removeBookFlow(manager);
+                case 3 -> listBooksFlow(manager);
+                case 4 -> addMemberFlow(manager);
+                case 5 -> listMembersFlow(manager);
+                case 6 -> borrowBookFlow(manager);
+                case 7 -> returnBookFlow(manager);
+                case 8 -> listLoansFlow(manager);
+                case 9 -> searchBooksFlow(manager);
+                case 10 -> searchMembersFlow(manager);
+                case 11 -> {
                     System.out.println("Exiting the system.");
                     sc.close();
                     return;
                 }
-                default -> System.out.println("Invalid choice. Please enter 1-10.");
+                default -> System.out.println("Invalid choice. Please enter 1-11.");
             }
         }
     }
@@ -47,15 +48,16 @@ public class LibraryApp {
     private static void printMenu() {
         System.out.println("\n--- MENU ---");
         System.out.println("1) Add book");
-        System.out.println("2) List books");
-        System.out.println("3) Add member");
-        System.out.println("4) List members");
-        System.out.println("5) Borrow book");
-        System.out.println("6) Return book");
-        System.out.println("7) List loans");
-        System.out.println("8) Search books");
-        System.out.println("9) Search members");
-        System.out.println("10) Exit");
+        System.out.println("2) Remove book");
+        System.out.println("3) List books");
+        System.out.println("4) Add member");
+        System.out.println("5) List members");
+        System.out.println("6) Borrow book");
+        System.out.println("7) Return book");
+        System.out.println("8) List loans");
+        System.out.println("9) Search books");
+        System.out.println("10) Search members");
+        System.out.println("11) Exit");
     }
 
     // ---------------- FLOWS ----------------
@@ -74,6 +76,18 @@ public class LibraryApp {
             System.out.println("Book added: " + id + " - " + title);
         } catch (Exception e) {
             System.out.println("Failed to add book: " + e.getMessage());
+        }
+    }
+
+    private static void removeBookFlow(LibraryManager manager) {
+        System.out.println("\n--- REMOVE BOOK ---");
+        String bookId = readLine("Book ID: ");
+
+        boolean ok = manager.removeBook(bookId);
+        if (ok) {
+            System.out.println("Book removed successfully.");
+        } else {
+            System.out.println("Remove failed. Book not found or currently loaned out.");
         }
     }
 
@@ -216,7 +230,7 @@ public class LibraryApp {
         }
     }
 
-    // ---------------- INPUT HELPERS ----------------
+   
 
     private static int readInt(String prompt) {
         while (true) {
@@ -235,7 +249,7 @@ public class LibraryApp {
         return sc.nextLine().trim();
     }
 
-    // ---------------- DEMO DATA ----------------
+   
 
     private static void seedDemoData(LibraryManager manager) {
         manager.addBook(new Book("B1", "Clean Code", "Robert C. Martin", "1111", 2));
@@ -245,3 +259,4 @@ public class LibraryApp {
         manager.addMember(new StudentMember("S1", "Esra", "esra@example.com", "CENG"));
     }
 }
+
