@@ -19,7 +19,9 @@ public class LibraryApp {
         seedDemoData(manager); 
 
         System.out.println("=== Library Management System ===");
-
+        listBooksFlow(manager);
+        listMembersFlow(manager);
+        
         while (true) {
             printMenu();
             int choice = readInt("Choice: ");
@@ -60,7 +62,7 @@ public class LibraryApp {
         System.out.println("11) Exit");
     }
 
-    // ---------------- FLOWS ----------------
+  
 
     private static void addBookFlow(LibraryManager manager) {
         System.out.println("\n--- ADD BOOK ---");
@@ -134,8 +136,19 @@ public class LibraryApp {
             return;
         }
 
+       
         for (Member m : manager.getMembers()) {
-            System.out.println(m.getMemberId() + " - " + m.getName() + " | " + m.getEmail());
+            String type = (m instanceof StudentMember) ? "STUDENT" : "NORMAL";
+
+            String extra = "";
+            if (m instanceof StudentMember sm) {
+                extra = " | dept: " + sm.getDepartment();
+            }
+
+            System.out.println(type + " | " + m.getMemberId()
+                    + " - " + m.getName()
+                    + " | " + m.getEmail()
+                    + extra);
         }
     }
 
@@ -152,6 +165,11 @@ public class LibraryApp {
         boolean ok = manager.borrowBook(loanId, bookId, memberId, loanDate, dueDate);
         if (ok) {
             System.out.println("Borrowed successfully.");
+            
+            Book b = manager.findBookById(bookId);
+            if (b != null) {
+                System.out.println("Availability updated: " 
+                        + b.getAvailableCopies() + "/" + b.getTotalCopies());}
         } else {
             System.out.println("Borrow failed.");
         }
@@ -161,16 +179,22 @@ public class LibraryApp {
         System.out.println("\n--- RETURN BOOK ---");
         String loanId = readLine("Loan ID: ");
 
+        Loan loan = manager.findLoanById(loanId);
         boolean ok = manager.returnBook(loanId);
         if (!ok) {
             System.out.println("Return failed.");
             return;
         }
 
-        Loan loan = manager.findLoanById(loanId);
+        
         if (loan != null) {
             System.out.println("LateDays = " + loan.getLateDays());
             System.out.println("Fee     = " + loan.calculateLateFee());
+            Book b = loan.getBook();
+            if (b != null) {
+                System.out.println("Availability updated: "
+                        + b.getAvailableCopies() + "/" + b.getTotalCopies());
+            }
         }
 
         System.out.println("Returned successfully.");
@@ -252,11 +276,24 @@ public class LibraryApp {
    
 
     private static void seedDemoData(LibraryManager manager) {
+
+      
         manager.addBook(new Book("B1", "Clean Code", "Robert C. Martin", "1111", 2));
         manager.addBook(new Book("B2", "Effective Java", "Joshua Bloch", "2222", 1));
+        manager.addBook(new Book("B3", "Head First Java", "Kathy Sierra", "3333", 3));
+        manager.addBook(new Book("B4", "Design Patterns", "GoF", "4444", 2));
+        manager.addBook(new Book("B5", "Introduction to Algorithms", "Cormen", "5555", 2));
+        manager.addBook(new Book("B6", "Refactoring", "Martin Fowler", "6666", 1));
 
+        
         manager.addMember(new Member("M1", "Ali", "ali@example.com"));
+        manager.addMember(new Member("M2", "Ayşe", "ayse@example.com"));
+        manager.addMember(new Member("M3", "Mehmet", "mehmet@example.com"));
+
+        
         manager.addMember(new StudentMember("S1", "Esra", "esra@example.com", "CENG"));
+        manager.addMember(new StudentMember("S2", "Zeynep", "zeynep@example.com", "SE"));
+        manager.addMember(new StudentMember("S3", "Kerem", "kerem@example.com", "EEE"));
     }
 }
 
