@@ -25,6 +25,23 @@ public class LoanTest {
         assertEquals(0, loan.getLateDays());
     }
 
+    
+    @Test
+    void calculateLateFee_matchesLateDays() {
+        Book b = new Book("B1", "T", "A", "1", 1);
+        Member m = new Member("M1", "Ali", "a@a.com");
+
+        LocalDate loanDate = LocalDate.of(2025, 1, 1);
+        LocalDate due = loanDate.plusDays(7);
+
+        Loan loan = new Loan("L1", b, m, loanDate, due);
+        loan.returnBook(due.plusDays(2));
+
+        assertEquals(2, loan.getLateDays());
+        assertTrue(loan.calculateLateFee() > 0);
+    }
+
+    
     @Test
     void getLateDays_returnsPositive_whenLate() {
         Book b = new Book("B1", "T", "A", "1", 1);
