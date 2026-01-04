@@ -27,7 +27,12 @@ public class LibraryManager {
 
   
     public void addBook(Book book) {
-        if (book == null) throw new IllegalArgumentException("book is null");
+        if (book == null) {
+            throw new IllegalArgumentException("book required");
+        }
+        if (findBookById(book.getId()) != null) {
+            throw new IllegalArgumentException("Book ID already exists: " + book.getId());
+        }
         books.add(book);
     }
 
@@ -35,22 +40,19 @@ public class LibraryManager {
         if (id == null) return null;
 
         for (Book b : books) {
-            if (id.equals(b.getId())) {
-                return b;
-            }
+        	if (b.getId().equalsIgnoreCase(id)) return b;
         }
         return null;
     }
 
-    // Add/remove books (Minimum feature)
-    // Kitap ödünçteyse (available < total) silmeye izin vermez.
+ 
     public boolean removeBook(String bookId) {
         Book b = findBookById(bookId);
         if (b == null) {
             return false;
         }
 
-        // Ödünçte kitap varsa silme (en az 1 kopya dışarıda)
+       
         if (b.getAvailableCopies() < b.getTotalCopies()) {
             return false;
         }
@@ -58,24 +60,27 @@ public class LibraryManager {
         return books.remove(b);
     }
 
-    // ---------------- MEMBER ----------------
+    
     public void addMember(Member member) {
-        if (member == null) throw new IllegalArgumentException("member is null");
+        if (member == null)  {
+            throw new IllegalArgumentException("member required");
+        }
+        if (findMemberById(member.getMemberId()) != null) {
+            throw new IllegalArgumentException("Member ID already exists: " + member.getMemberId());
+        }
         members.add(member);
     }
 
-    public Member findMemberById(String id) {
-        if (id == null) return null;
+    public Member findMemberById(String memberId) {
+        if (memberId == null) return null;
 
         for (Member m : members) {
-            if (id.equals(m.getMemberId())) {
-                return m;
-            }
+        	  if (m.getMemberId().equalsIgnoreCase(memberId)) return m;
         }
         return null;
     }
 
-    // ---------------- LOAN ----------------
+    
     public Loan findLoanById(String loanId) {
         if (loanId == null) return null;
 
@@ -112,7 +117,7 @@ public class LibraryManager {
             loans.add(loan);
             return true;
         } catch (Exception e) {
-            // loan oluşamadıysa stoğu geri al
+            
             book.returnCopy();
             System.out.println("Loan create failed: " + e.getMessage());
             return false;
