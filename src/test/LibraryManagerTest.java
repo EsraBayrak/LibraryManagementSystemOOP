@@ -27,6 +27,16 @@ public class LibraryManagerTest {
         manager.addMember(new StudentMember("S1", "Esra", "esra@example.com", "CENG"));
     }
 
+    
+    @Test
+    void addBook_throws_whenDuplicateId() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            manager.addBook(new Book("B1", "Another", "X", "9999", 1));
+        });
+    }
+
+    
+    
     @Test
     void borrowBook_success_decreasesAvailableCopies_andCreatesLoan() {
         LocalDate loanDate = LocalDate.of(2025, 1, 1);
@@ -39,7 +49,7 @@ public class LibraryManagerTest {
 
         Book b2 = manager.findBookById("B2");
         assertNotNull(b2);
-        assertEquals(0, b2.getAvailableCopies()); // B2 total=1 idi, 0'a indi
+        assertEquals(0, b2.getAvailableCopies()); 
     }
 
     @Test
@@ -48,11 +58,11 @@ public class LibraryManagerTest {
         LocalDate dueDate = loanDate.plusDays(7);
 
         assertTrue(manager.borrowBook("L1", "B2", "M1", loanDate, dueDate));
-        assertFalse(manager.borrowBook("L2", "B2", "S1", loanDate, dueDate)); // stok yok
+        assertFalse(manager.borrowBook("L2", "B2", "S1", loanDate, dueDate)); 
 
         Book b2 = manager.findBookById("B2");
         assertEquals(0, b2.getAvailableCopies());
-        assertNull(manager.findLoanById("L2")); // başarısız olduğu için eklenmemeli
+        assertNull(manager.findLoanById("L2")); 
     }
 
     @Test
@@ -62,7 +72,7 @@ public class LibraryManagerTest {
 
         assertTrue(manager.borrowBook("L1", "B1", "M1", loanDate, dueDate));
         Book b1 = manager.findBookById("B1");
-        assertEquals(1, b1.getAvailableCopies()); // 2 idi, 1 oldu
+        assertEquals(1, b1.getAvailableCopies()); 
 
         boolean ok = manager.returnBook("L1");
         assertTrue(ok);
@@ -71,7 +81,7 @@ public class LibraryManagerTest {
         assertNotNull(loan);
         assertTrue(loan.isReturned());
 
-        assertEquals(2, b1.getAvailableCopies()); // geri 2 olmalı
+        assertEquals(2, b1.getAvailableCopies()); 
     }
 
     @Test
@@ -87,8 +97,25 @@ public class LibraryManagerTest {
     }
 
     @Test
+    void addMember_throws_whenDuplicateId() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            manager.addMember(new Member("M1", "Veli", "veli@example.com"));
+        });
+    }
+
+    
+    @Test
+    void addStudentMember_throws_whenDuplicateId() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            manager.addMember(new StudentMember("S1", "X", "x@x.com", "CENG"));
+        });
+    }
+
+    
+    
+    @Test
     void searchMembers_usesMatches_polymorphismWorks() {
-        // StudentMember.matches() department alanını da arıyor olmalı
+        
         List<Member> res = manager.searchMembers("ceng");
         assertEquals(1, res.size());
         assertEquals("S1", res.get(0).getMemberId());
